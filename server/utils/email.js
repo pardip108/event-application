@@ -47,3 +47,6 @@ const sendOTPEmail = async (userEmail, otp, type) => {
         console.error(`Error sending OTP email to ${userEmail}:`, error);
     }
 }
+
+
+module.exports = { sendBookingEmail, sendOTPEmail };

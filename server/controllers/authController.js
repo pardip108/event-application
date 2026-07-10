@@ -88,10 +88,21 @@ exports.verifyOtp = async (req, res) => {
     try {
         const otpRecord = await OTP.findOne({ email, otp, action: 'account_verification' });
         if (!otpRecord) {
-            return res.status(400).json({ error: "Invalid OTP" });
+            return res.status(400).json({ error: "Invalid OTP or Email" });
         }
 
-        const user = await User.findOneAndUpdate({ email }, { isVerified: true });
+        const before = await User.findOne({ email });
+
+
+        const user = await User.findOneAndUpdate(
+            { email },
+            { $set: { isVerified: true } },
+            { returnDocument: "after" }
+        );
+
+
+
+
         await OTP.deleteMany({ email, action: 'account_verification' });
 
         res.json({ 

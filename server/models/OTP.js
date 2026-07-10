@@ -10,7 +10,7 @@ const otpSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    ation:{
+    action:{
         type: String,
         enum: ['account_verification', 'event-booking'], 
         required: true
@@ -22,4 +22,4 @@ const otpSchema = new mongoose.Schema({
     }
 })
 
-export default mongoose.model('OTP', otpSchema);
+module.exports = mongoose.model('OTP', otpSchema)
