@@ -3,6 +3,8 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const authRoutes = require("./routes/auth");
+const eventRoutes = require("./routes/events");
+const bookingRoutes = require("./routes/booking");
 
 
 // Load environment variables from .env file
@@ -16,12 +18,14 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/events", eventRoutes);
+// app.use("/api/bookings", bookingRoutes);
 
-console.log("EMAIL_USER:", process.env.EMAIL_USER);
-console.log("EMAIL_PASS:", process.env.EMAIL_PASS);
+// console.log("EMAIL_USER:", process.env.EMAIL_USER);
+// console.log("EMAIL_PASS:", process.env.EMAIL_PASS);
 
 
-console.log("MongoDB URI:", process.env.MONGO_URI);
+// console.log("MongoDB URI:", process.env.MONGO_URI);
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
