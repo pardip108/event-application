@@ -10,11 +10,11 @@ exports.getAllEvents = async (req, res) => {
         if (req.query.category) {
             filter.category = req.query.category;
         }
-        if (req.query.ticketPrice) {
-            filter.ticketPrice = req.query.ticketPrice;
+        if (req.query.search) {
+            filter.title = { $regex: req.query.search, $options: 'i' };
         }
 
-        const events = await Event.find(filter);
+        const events = await Event.find(filter).populate('createdBy', 'name email');
         res.json(events);
     }
     catch (error) {
@@ -25,20 +25,20 @@ exports.getAllEvents = async (req, res) => {
 
 exports.getEventById = async (req, res) => {
     try {
-        const event = await Event.findById(req.params.id);
+        const event = await Event.findById(req.params.id).populate('createdBy', 'name email');
         if (!event) {
             return res.status(404).json({ message: "Event not found" });
         }
         res.json(event);
     }
     catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({message: "Server error: " , error: error.message });
     }
 }
 
 exports.createEvent = async (req, res) => {
     try {
-        const { title, description, date, location, category, totalSeats, availableSeats, ticketPrice, imageUrl } = req.body;
+        const { title, description, date, location, category, totalSeats, ticketPrice, imageUrl } = req.body;
         const event = new Event({
             title,
             description,
@@ -46,9 +46,9 @@ exports.createEvent = async (req, res) => {
             location,
             category,
             totalSeats,
-            availableSeats,
-            ticketPrice,
-            imageUrl,
+            availableSeats: totalSeats, // Initially, available seats are equal to total seats
+            ticketPrice: ticketPrice || 0, // Default ticket price to 0 if not provided
+            imageUrl: imageUrl || '', // Default image URL to empty string if not provided  
             createdBy: req.user._id
         });
         await event.save();
@@ -61,40 +61,28 @@ exports.createEvent = async (req, res) => {
 
 exports.updateEvent = async (req, res) => {
     try {
-        const event = await Event.findById(req.params.id);
+        const event = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!event) {
             return res.status(404).json({ message: "Event not found" });
         }
-        const { title, description, date, location, category, totalSeats, availableSeats, ticketPrice, imageUrl } = req.body;
-        event.title = title || event.title;
-        event.description = description || event.description;
-        event.date = date || event.date;
-        event.location = location || event.location;
-        event.category = category || event.category;
-        event.totalSeats = totalSeats || event.totalSeats;
-        event.availableSeats = availableSeats || event.availableSeats;
-        event.ticketPrice = ticketPrice || event.ticketPrice;
-        event.imageUrl = imageUrl || event.imageUrl;
-
-        await event.save();
         res.json(event);
     }
     catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({message: "Server error: " , error: error.message });
     }
 }
 
+
 exports.deleteEvent = async (req, res) => {
     try {
-        const event = await Event.findById(req.params.id);
+        const event = await Event.findByIdAndDelete(req.params.id);
         if (!event) {
             return res.status(404).json({ message: "Event not found" });
         }
-        await event.remove();
         res.json({ message: "Event deleted" });
     }
     catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({message: "Server error: " , error: error.message });
     }
 }   
 
